@@ -14,8 +14,6 @@ import SkeletonLoader from './components/SkeletonLoader'
 import { saveSnippet, loadSnippet } from './lib/snippetStorage'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const [currentId, setCurrentId] = useState(null);
-
 const LANGUAGE_PATTERNS = {
   java: [/public\s+class/, /public\s+static\s+void\s+main/, /System\.out\.println/, /import\s+java\./],
   javascript: [/const\s+\w+\s*=/, /let\s+\w+\s*=/, /function\s*\w*\s*\(/, /=>\s*{/, /console\.log/],
@@ -74,6 +72,8 @@ function App() {
   const [language, setLanguage] = useState('java')
   const [title, setTitle] = useState('Untitled Snippet')
   const [snippetId, setSnippetId] = useState(null)
+  const [currentId, setCurrentId] = useState(null)
+  const [isReadOnly, setIsReadOnly] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [toast, setToast] = useState(null)
@@ -106,25 +106,27 @@ function App() {
 const handleSave = useCallback(async () => {
   setIsSaving(true);
   try {
-    const saved = await saveSnippet({ 
-      title, 
-      code, 
-      language, 
-      id: currentId 
+    const saved = await saveSnippet({
+      title,
+      code,
+      language,
+      id: currentId
     });
-    
+
     setCurrentId(saved.id);
+    setSnippetId(saved.id);
+    setIsReadOnly(false); // Owner can edit
     setToast({ message: 'Saved successfully!', type: 'success' });
-    
+
     // Update URL if it's a new save
     if (!window.location.pathname.includes(saved.id)) {
       window.history.pushState({}, '', `/s/${saved.id}`);
     }
   } catch (err) {
     // This catches the "Ownership" error we threw in snippetStorage.js
-    setToast({ 
-      message: err.message || 'Failed to save snippet', 
-      type: 'error' 
+    setToast({
+      message: err.message || 'Failed to save snippet',
+      type: 'error'
     });
     console.error("Save error:", err);
   } finally {
@@ -179,10 +181,16 @@ const handleSave = useCallback(async () => {
         setCode(loaded.code)
         setTitle(loaded.title)
         setLanguage(loaded.language)
+        setSnippetId(loaded.id)
+        setCurrentId(loaded.id)
+        // Check if user has edit token (is owner)
+        const hasEditToken = !!localStorage.getItem(`edit_token_${loaded.id}`)
+        setIsReadOnly(!hasEditToken)
       } else {
         setCode(snippet.code || '// Snippet content')
         setTitle(snippet.title || snippet.name)
         setLanguage(snippet.language)
+        setIsReadOnly(false)
       }
     } catch (err) {
       console.error('Failed to load snippet:', err)
@@ -228,6 +236,10 @@ const handleSave = useCallback(async () => {
             setTitle(data.title)
             setLanguage(data.language)
             setSnippetId(data.id)
+            setCurrentId(data.id)
+            // Check if user has edit token (is owner)
+            const hasEditToken = !!localStorage.getItem(`edit_token_${data.id}`)
+            setIsReadOnly(!hasEditToken)
             setToast({ message: 'Snippet loaded', type: 'success' })
           }
         })
@@ -267,6 +279,7 @@ const handleSave = useCallback(async () => {
         currentTheme={theme}
         onThemeChange={setTheme}
         currentId={currentId}
+        isReadOnly={isReadOnly}
       />
 
       <div className="flex-1 flex min-h-0">
@@ -287,6 +300,7 @@ const handleSave = useCallback(async () => {
             onTitleChange={setTitle}
             language={language}
             onLanguageChange={handleLanguageChange}
+            isReadOnly={isReadOnly}
           />
 
           {isLoading ? (
@@ -304,6 +318,7 @@ const handleSave = useCallback(async () => {
                 setCode={handleCodeChange}
                 language={language}
                 setLanguage={handleLanguageChange}
+                isReadOnly={isReadOnly}
               />
             </motion.div>
           )}

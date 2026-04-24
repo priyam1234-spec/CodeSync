@@ -11,7 +11,7 @@ const languageOptions = [
   { value: 'cpp', label: 'C++', icon: '⚡' },
 ]
 
-function CodeEditor({ code, setCode, language, setLanguage }) {
+function CodeEditor({ code, setCode, language, setLanguage, isReadOnly = false }) {
   const [editorInstance, setEditorInstance] = useState(null)
 
   const handleEditorMount = (editor) => {
@@ -29,7 +29,8 @@ function CodeEditor({ code, setCode, language, setLanguage }) {
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border)] rounded-lg pl-8 pr-8 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] appearance-none cursor-pointer"
+            disabled={isReadOnly}
+            className="bg-[var(--bg-tertiary)] text-[var(--text-primary)] border border-[var(--border)] rounded-lg pl-8 pr-8 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {languageOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -51,6 +52,7 @@ function CodeEditor({ code, setCode, language, setLanguage }) {
           onMount={handleEditorMount}
           theme="vs-dark"
           options={{
+            readOnly: isReadOnly,
             minimap: { enabled: false },
             fontSize: 14,
             lineNumbers: 'on',

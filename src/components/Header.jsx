@@ -2,9 +2,7 @@ import { Plus, Code2, Menu, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import ThemeSelector from './ThemeSelector'
 
-function Header({ onNewSnippet, onToggleSidebar, currentTheme, onThemeChange, currentId = null}) {
-  // Check if we have ownership of the current snippet
-  const hasEditAccess = !currentId || !!localStorage.getItem(`edit_token_${currentId}`);
+function Header({ onNewSnippet, onToggleSidebar, currentTheme, onThemeChange, currentId = null, isReadOnly = false }) {
 
   return (
     <header className="h-16 border-b border-[var(--border)] px-6 flex items-center justify-between bg-[var(--bg-secondary)]">
@@ -36,10 +34,10 @@ function Header({ onNewSnippet, onToggleSidebar, currentTheme, onThemeChange, cu
           <span className="text-sm text-[var(--text-muted)]">
             Made with ❤️ by Priyam
           </span>
-          
-          {/* --- BONUS HINT: Read-Only Badge --- */}
-          {!hasEditAccess && (
-            <motion.div 
+
+          {/* Read-Only Badge */}
+          {isReadOnly && (
+            <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-medium"

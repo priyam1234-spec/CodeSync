@@ -12,7 +12,7 @@ const LANGUAGES = [
   { value: 'rust', label: 'Rust' },
 ]
 
-function EditorToolbar({ onSave, onCopyLink, onFormatCode, isSaving, isFormatting, title, onTitleChange, onCopyAsImage, language, onLanguageChange }) {
+function EditorToolbar({ onSave, onCopyLink, onFormatCode, isSaving, isFormatting, title, onTitleChange, onCopyAsImage, language, onLanguageChange, isReadOnly = false }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopyLink = async () => {
@@ -37,14 +37,16 @@ function EditorToolbar({ onSave, onCopyLink, onFormatCode, isSaving, isFormattin
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Untitled Snippet"
-          className="bg-transparent text-[var(--text-primary)] text-lg font-medium border-none outline-none focus:ring-2 focus:ring-[var(--accent)] rounded-lg px-3 py-1.5 w-full max-w-md"
+          disabled={isReadOnly}
+          className="bg-transparent text-[var(--text-primary)] text-lg font-medium border-none outline-none focus:ring-2 focus:ring-[var(--accent)] rounded-lg px-3 py-1.5 w-full max-w-md disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <div className="relative">
           <motion.button
             onClick={() => setShowLangDropdown(!showLangDropdown)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-3 py-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors text-sm"
+            disabled={isReadOnly}
+            className="flex items-center gap-2 px-3 py-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="capitalize">{currentLang}</span>
             <ChevronDown className="w-3 h-3" />
@@ -83,8 +85,8 @@ function EditorToolbar({ onSave, onCopyLink, onFormatCode, isSaving, isFormattin
           onClick={onFormatCode}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          disabled={isFormatting}
-          className="flex items-center gap-2 px-3 py-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors disabled:opacity-50"
+          disabled={isFormatting || isReadOnly}
+          className="flex items-center gap-2 px-3 py-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Format Code (Ctrl+F)"
         >
           {isFormatting ? (
@@ -132,8 +134,9 @@ function EditorToolbar({ onSave, onCopyLink, onFormatCode, isSaving, isFormattin
           onClick={handleSave}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          disabled={isSaving}
+          disabled={isSaving || isReadOnly}
           className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--accent)]/25"
+          title={isReadOnly ? "Only the author can edit this snippet" : "Save"}
         >
           {isSaving ? (
             <motion.div
