@@ -2,7 +2,7 @@ import { Plus, Code2, Menu, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import ThemeSelector from './ThemeSelector'
 
-function Header({ onNewSnippet, onToggleSidebar, currentTheme, onThemeChange, currentId }) {
+function Header({ onNewSnippet, onToggleSidebar, currentTheme, onThemeChange, currentId = null}) {
   // Check if we have ownership of the current snippet
   const hasEditAccess = !currentId || !!localStorage.getItem(`edit_token_${currentId}`);
 
