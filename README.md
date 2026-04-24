@@ -2,7 +2,7 @@
 
 A modern, beautiful code snippet sharing tool built for developers. Save, organize, and share your code snippets with a professional IDE-like experience.
 
-![CodeSync Preview]([https://github.com/priyam1234-spec/CodeSync/blob/main/public/screenshots/og-preview.png](https://github.com/priyam1234-spec/CodeSync/blob/main/public/screenshots/og-preview.png))
+![CodeSync Preview](./public/screenshots/og-preview.png)
 
 ## Features
 
