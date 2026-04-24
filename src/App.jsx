@@ -14,6 +14,8 @@ import SkeletonLoader from './components/SkeletonLoader'
 import { saveSnippet, loadSnippet } from './lib/snippetStorage'
 import { motion, AnimatePresence } from 'framer-motion'
 
+const [currentId, setCurrentId] = useState(null);
+
 const LANGUAGE_PATTERNS = {
   java: [/public\s+class/, /public\s+static\s+void\s+main/, /System\.out\.println/, /import\s+java\./],
   javascript: [/const\s+\w+\s*=/, /let\s+\w+\s*=/, /function\s*\w*\s*\(/, /=>\s*{/, /console\.log/],
@@ -264,6 +266,7 @@ const handleSave = useCallback(async () => {
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         currentTheme={theme}
         onThemeChange={setTheme}
+        currentId={currentId}
       />
 
       <div className="flex-1 flex min-h-0">
