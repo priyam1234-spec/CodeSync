@@ -9,39 +9,49 @@ function getLocalSnippets() {
 }
 
 export async function saveSnippet(snippet) {
-  if (isSupabaseConfigured()) {
-    // 1. Pull the secret token from LocalStorage for this specific snippet
-    const storedToken = localStorage.getItem(`edit_token_${snippet.id}`);
+  if (!isSupabaseConfigured()) {
+    /* ... local storage logic ... */
+    return;
+  }
 
-    // 2. Prepare the request
-    let query = supabase.from('snippets').upsert({
-      id: snippet.id || undefined, // If no ID, Supabase creates one
+  const isNew = !snippet.id;
+  const storedToken = snippet.id ? localStorage.getItem(`edit_token_${snippet.id}`) : null;
+
+  // We build the query object first
+  let query;
+  
+  if (isNew) {
+    // FRESH INSERT: No ID, no Token needed
+    query = supabase.from('snippets').insert({
+      title: snippet.title || 'Untitled',
+      code: snippet.code,
+      language: snippet.language,
+    });
+  } else {
+    // SECURE UPDATE: Must send the token
+    query = supabase.from('snippets').update({
       title: snippet.title,
       code: snippet.code,
       language: snippet.language,
       updated_at: new Date().toISOString(),
-    });
-
-    // 3. IF we have a token, attach it to the headers
-    if (storedToken) {
-      query = query.setHeader('x-edit-token', storedToken);
-    }
-
-    const { data, error } = await query.select().single();
-
-    if (error) {
-      // If error code is 42501 here, it means the token didn't match!
-      throw error;
-    }
-
-    // 4. If this was a brand new snippet, save the new token we just got back
-    if (data.edit_token && !storedToken) {
-      localStorage.setItem(`edit_token_${data.id}`, data.edit_token);
-    }
-
-    return data;
+    })
+    .eq('id', snippet.id)
+    .setHeader('x-edit-token', storedToken || '');
   }
-  // ... rest of your local storage fallback
+
+  const { data, error } = await query.select().single();
+
+  if (error) {
+    console.error("Database Error:", error.message);
+    throw error;
+  }
+
+  // If it's new, save the brand new token so we can edit later
+  if (isNew && data.edit_token) {
+    localStorage.setItem(`edit_token_${data.id}`, data.edit_token);
+  }
+
+  return data;
 }
 
 export async function loadSnippet(id) {
