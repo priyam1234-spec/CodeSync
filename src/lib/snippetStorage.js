@@ -17,18 +17,15 @@ export async function saveSnippet(snippet) {
   const isNew = !snippet.id;
   const storedToken = snippet.id ? localStorage.getItem(`edit_token_${snippet.id}`) : null;
 
-  // We build the query object first
   let query;
   
   if (isNew) {
-    // FRESH INSERT: No ID, no Token needed
     query = supabase.from('snippets').insert({
       title: snippet.title || 'Untitled',
       code: snippet.code,
       language: snippet.language,
     });
   } else {
-    // SECURE UPDATE: Must send the token
     query = supabase.from('snippets').update({
       title: snippet.title,
       code: snippet.code,
@@ -42,11 +39,13 @@ export async function saveSnippet(snippet) {
   const { data, error } = await query.select().single();
 
   if (error) {
-    console.error("Database Error:", error.message);
+    // Check for the RLS Permission Denied code
+    if (error.code === '42501') {
+      throw new Error("You do not have permission to edit this snippet. It likely belongs to someone else.");
+    }
     throw error;
   }
 
-  // If it's new, save the brand new token so we can edit later
   if (isNew && data.edit_token) {
     localStorage.setItem(`edit_token_${data.id}`, data.edit_token);
   }
