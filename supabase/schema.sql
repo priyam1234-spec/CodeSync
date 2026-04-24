@@ -1,7 +1,4 @@
--- CodeSync Snippets Table
--- Run this in your Supabase SQL Editor to create the snippets table
-
--- Drop existing table if it exists to start fresh
+-- 1. Reset Table
 DROP TABLE IF EXISTS snippets CASCADE;
 
 CREATE TABLE snippets (
@@ -13,13 +10,23 @@ CREATE TABLE snippets (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Index for faster lookups by updated date
-CREATE INDEX idx_snippets_updated_at ON snippets(updated_at DESC);
+-- 2. Permissions (CRITICAL STEP)
+-- This tells the database that the 'anon' user is actually allowed to 
+-- perform actions on this table. Without this, RLS policies often fail.
+GRANT ALL ON TABLE snippets TO anon;
+GRANT ALL ON TABLE snippets TO authenticated;
+GRANT ALL ON TABLE snippets TO service_role;
 
--- Index for language filtering
-CREATE INDEX idx_snippets_language ON snippets(language);
+-- 3. Row Level Security
+ALTER TABLE snippets ENABLE ROW LEVEL SECURITY;
 
--- Function to automatically update updated_at timestamp
+-- 4. Simplified Policies (Targeting 'public' covers both anon and auth)
+CREATE POLICY "Public Read" ON snippets FOR SELECT USING (true);
+CREATE POLICY "Public Insert" ON snippets FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public Update" ON snippets FOR UPDATE USING (true);
+CREATE POLICY "Public Delete" ON snippets FOR DELETE USING (true);
+
+-- 5. Auto-Update Timestamp Logic
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -28,35 +35,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger to auto-update updated_at
 CREATE TRIGGER update_snippets_updated_at
   BEFORE UPDATE ON snippets
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
-
--- Row Level Security (RLS)
-ALTER TABLE snippets ENABLE ROW LEVEL SECURITY;
-
--- Policy: Allow anonymous users to read all snippets
-CREATE POLICY "Enable read access for all users"
-  ON snippets FOR SELECT
-  TO anon
-  USING (true);
-
--- Policy: Allow anonymous users to insert snippets
-CREATE POLICY "Enable insert access for all users"
-  ON snippets FOR INSERT
-  TO anon
-  WITH CHECK (true);
-
--- Policy: Allow anonymous users to update all snippets
-CREATE POLICY "Enable update access for all users"
-  ON snippets FOR UPDATE
-  TO anon
-  USING (true);
-
--- Policy: Allow anonymous users to delete all snippets
-CREATE POLICY "Enable delete access for all users"
-  ON snippets FOR DELETE
-  TO anon
-  USING (true);
