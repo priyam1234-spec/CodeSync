@@ -1,8 +1,11 @@
-import { Plus, Code2, Menu } from 'lucide-react'
+import { Plus, Code2, Menu, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import ThemeSelector from './ThemeSelector'
 
-function Header({ onNewSnippet, onToggleSidebar, currentTheme, onThemeChange }) {
+function Header({ onNewSnippet, onToggleSidebar, currentTheme, onThemeChange, currentId }) {
+  // Check if we have ownership of the current snippet
+  const hasEditAccess = !currentId || !!localStorage.getItem(`edit_token_${currentId}`);
+
   return (
     <header className="h-16 border-b border-[var(--border)] px-6 flex items-center justify-between bg-[var(--bg-secondary)]">
       {/* Left Section */}
@@ -28,12 +31,23 @@ function Header({ onNewSnippet, onToggleSidebar, currentTheme, onThemeChange }) 
           </h1>
         </motion.div>
 
-        {/* --- MOVED SECTION --- */}
         <div className="hidden lg:flex items-center gap-4 ml-2">
-          <div className="h-4 w-[1px] bg-[var(--border)]" /> {/* Vertical Separator */}
+          <div className="h-4 w-[1px] bg-[var(--border)]" />
           <span className="text-sm text-[var(--text-muted)]">
             Made with ❤️ by Priyam
           </span>
+          
+          {/* --- BONUS HINT: Read-Only Badge --- */}
+          {!hasEditAccess && (
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-medium"
+            >
+              <Lock className="w-3 h-3" />
+              <span>Read Only</span>
+            </motion.div>
+          )}
         </div>
       </div>
 
