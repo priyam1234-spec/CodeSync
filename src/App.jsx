@@ -101,23 +101,34 @@ function App() {
     }
   }, [theme])
 
-  const handleSave = useCallback(async () => {
-    setIsSaving(true)
-    try {
-      const saved = await saveSnippet({ title, code, language, id: snippetId })
-      if (saved?.id) setSnippetId(saved.id)
-
-      // Short URL using snippet ID
-      const shortUrl = `${window.location.origin}/?id=${saved.id}`
-      window.history.pushState({}, '', `?id=${saved.id}`)
-
-      setToast({ message: 'Saved to Supabase!', type: 'success' })
-    } catch (err) {
-      console.error('Save failed:', err)
-      setToast({ message: 'Save failed', type: 'error' })
+const handleSave = useCallback(async () => {
+  setIsSaving(true);
+  try {
+    const saved = await saveSnippet({ 
+      title, 
+      code, 
+      language, 
+      id: currentId 
+    });
+    
+    setCurrentId(saved.id);
+    setToast({ message: 'Saved successfully!', type: 'success' });
+    
+    // Update URL if it's a new save
+    if (!window.location.pathname.includes(saved.id)) {
+      window.history.pushState({}, '', `/s/${saved.id}`);
     }
-    setIsSaving(false)
-  }, [code, language, title, snippetId])
+  } catch (err) {
+    // This catches the "Ownership" error we threw in snippetStorage.js
+    setToast({ 
+      message: err.message || 'Failed to save snippet', 
+      type: 'error' 
+    });
+    console.error("Save error:", err);
+  } finally {
+    setIsSaving(false);
+  }
+}, [code, language, title, currentId]);
 
   const handleCopyLink = useCallback(async () => {
     if (snippetId) {
