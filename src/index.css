@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* Base theme (Midnight Pro - default) */
+:root {
+  --bg-primary: #0B0E14;
+  --bg-secondary: #151921;
+  --bg-tertiary: #1e2532;
+  --text-primary: #CBD5E1;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --accent: #7199FF;
+  --accent-hover: #5a7fe8;
+  --border: #1e293b;
+  --success: #10b981;
+  --border-primary: #1e293b;
+}
+
+/* Cyberpunk Theme */
+[data-theme="cyberpunk"] {
+  --bg-primary: #0D0221;
+  --bg-secondary: #1A0B2E;
+  --bg-tertiary: #2d1b4e;
+  --text-primary: #E0E0E0;
+  --text-secondary: #B9B9B9;
+  --text-muted: #8B8B8B;
+  --accent: #FF007F;
+  --accent-hover: #e0006f;
+  --border: #3d1f5a;
+  --success: #00F3FF;
+  --border-primary: #3d1f5a;
+}
+
+/* Nordic Frost Theme */
+[data-theme="nordic"] {
+  --bg-primary: #2E3440;
+  --bg-secondary: #3B4252;
+  --bg-tertiary: #4C566A;
+  --text-primary: #D8DEE9;
+  --text-secondary: #B8C0D8;
+  --text-muted: #9CA3B8;
+  --accent: #88C0D0;
+  --accent-hover: #7ab8c8;
+  --border: #4C566A;
+  --success: #A3BE8C;
+  --border-primary: #4C566A;
+}
+
+/* Hacker Green Theme */
+[data-theme="hacker"] {
+  --bg-primary: #050505;
+  --bg-secondary: #0A0A0A;
+  --bg-tertiary: #0f1f0f;
+  --text-primary: #C8F8C8;
+  --text-secondary: #88D888;
+  --text-muted: #559955;
+  --accent: #00FF41;
+  --accent-hover: #00dd38;
+  --border: #003B00;
+  --success: #00FF41;
+  --border-primary: #003B00;
+}
+
+/* Paperback Theme */
+[data-theme="paperback"] {
+  --bg-primary: #F5F2EE;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E8E4DE;
+  --text-primary: #2C2C2C;
+  --text-secondary: #5A5A5A;
+  --text-muted: #888888;
+  --accent: #944421;
+  --accent-hover: #7a381a;
+  --border: #E0DCD6;
+  --success: #2D7A4F;
+  --border-primary: #E0DCD6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
