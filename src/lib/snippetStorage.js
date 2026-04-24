@@ -10,36 +10,38 @@ function getLocalSnippets() {
 
 export async function saveSnippet(snippet) {
   if (isSupabaseConfigured()) {
-    // UPSERT: If ID exists, update. If not, insert.
-    const { data, error } = await supabase
-      .from('snippets')
-      .upsert({
-        id: snippet.id || undefined, // Let DB generate UUID if missing
-        title: snippet.title,
-        code: snippet.code,
-        language: snippet.language,
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
+    // 1. Pull the secret token from LocalStorage for this specific snippet
+    const storedToken = localStorage.getItem(`edit_token_${snippet.id}`);
 
-    if (error) throw error
-    return data
-  } else {
-    // Local storage fallback
-    const snippets = getLocalSnippets()
-    const snippetToSave = {
-      ...snippet,
-      id: snippet.id || crypto.randomUUID(),
+    // 2. Prepare the request
+    let query = supabase.from('snippets').upsert({
+      id: snippet.id || undefined, // If no ID, Supabase creates one
+      title: snippet.title,
+      code: snippet.code,
+      language: snippet.language,
       updated_at: new Date().toISOString(),
+    });
+
+    // 3. IF we have a token, attach it to the headers
+    if (storedToken) {
+      query = query.setHeader('x-edit-token', storedToken);
     }
-    const index = snippets.findIndex(s => s.id === snippetToSave.id)
-    if (index >= 0) snippets[index] = snippetToSave
-    else snippets.push(snippetToSave)
-    
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(snippets))
-    return snippetToSave
+
+    const { data, error } = await query.select().single();
+
+    if (error) {
+      // If error code is 42501 here, it means the token didn't match!
+      throw error;
+    }
+
+    // 4. If this was a brand new snippet, save the new token we just got back
+    if (data.edit_token && !storedToken) {
+      localStorage.setItem(`edit_token_${data.id}`, data.edit_token);
+    }
+
+    return data;
   }
+  // ... rest of your local storage fallback
 }
 
 export async function loadSnippet(id) {
